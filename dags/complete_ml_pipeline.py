@@ -1,4 +1,4 @@
-#Training the Model
+#Training the Model  and data pipeline
 import airflow
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
