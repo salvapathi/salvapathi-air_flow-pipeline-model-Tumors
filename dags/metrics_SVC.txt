@@ -1,5 +1,5 @@
 
-SVC model
+SVC modelss
 Accuracy Score : 0.9912280701754386
 Precision Score : 0.9767441860465116
 Recall Score : 1.0
