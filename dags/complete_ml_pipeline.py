@@ -29,10 +29,10 @@ svc=SVC()
 KNN=KNeighborsClassifier()
 LR=LogisticRegression()
 RF=RandomForestClassifier()
-model=svc
+model=RF
 param_grid = {
-    'parameters__kernel': ['rbf','linear', 'poly'],
-    'parameters__C': [1.0,0.5,2]
+    'parameters__n_estimators': [100,200],
+    'parameters__max_depth': [None,20,30,100]
     }
 # Define the DAG
 dag = DAG(
