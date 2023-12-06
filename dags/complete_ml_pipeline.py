@@ -9,7 +9,7 @@ import re
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import *
 from sklearn.pipeline import Pipeline,make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn import set_config
@@ -20,12 +20,21 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LogisticRegression
 import joblib
-RF=RandomForestClassifier()
+from datetime import datetime
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 svc=SVC()
 KNN=KNeighborsClassifier()
-model=svc
-
+LR=LogisticRegression()
+RF=RandomForestClassifier()
+model=RF
+param_grid = {
+    'parameters__n_estimators': [50, 100, 200],
+    'parameters__max_depth': [None, 10, 20],
+    'parameters__min_samples_split': [2, 5, 10],
+    }
 # Define the DAG
 dag = DAG(
     "complete_ml_pipeline",
@@ -76,30 +85,68 @@ def ml_model():
         ("Standardization", numeric_transformer, numeric_columns),
         ("onehotencoder", categorical_transformer,categorical_columns)
     ])
+    
+    #pipe=make_pipeline(columns_ct,model)
 
-   
+    pipe = Pipeline(steps=[
+    ("preprocessor", columns_ct),
+    ("parameters",model)])
 
-    pipe=make_pipeline(columns_ct,model)
-    set_config(display="diagram")
-    pipe.fit(x_train,y_train)
 
+
+    
+
+
+    grid_search = GridSearchCV(estimator=pipe, param_grid=param_grid, cv=5, scoring='accuracy')
+    grid_search.fit(x_train, y_train)
+
+    print("Best Hyperparameters:", grid_search.best_params_)
+    best_model_pipeline = grid_search.best_estimator_
+    best_model_pipeline.fit(x_train,y_train)
     #saving the model to a file 
     model_filename = "./dags/trained_modelsvc.joblib"
-    joblib.dump(pipe, model_filename)
+    joblib.dump(best_model_pipeline, model_filename)
     print("The model is  saved",model)
 
     #prediction
-    y_pred=pipe.predict(x_test)
+    y_pred=best_model_pipeline.predict(x_test)
     x_test["True_values"]=y_test
     x_test["predicted_vaues"]=y_pred.tolist()
     x_test.to_csv(r"./dags/test_data.csv",index=False)
+    train_score = best_model_pipeline.score(x_train, y_train)
+    test_score = best_model_pipeline.score(x_test,y_test)
+    print(f'Training Score: {train_score}')
+    print(f'Test Score: {test_score}')
 
-
-def model_evaluation():
+def model_evaluation(filename_prefix="metrics"):
     test_data=pd.read_csv(r"./dags/test_data.csv")
     accuracy = accuracy_score(test_data["True_values"],test_data["predicted_vaues"])
-    print(f"Accuracy OF THE MODEL {model} : {accuracy:.2f}")
+    precision=precision_score(test_data["True_values"],test_data["predicted_vaues"],pos_label='Malignant_tumors')
+    recall=recall_score(test_data["True_values"],test_data["predicted_vaues"],pos_label='Malignant_tumors')
+    f1=f1_score(test_data["True_values"],test_data["predicted_vaues"],pos_label='Malignant_tumors')
+    cm=confusion_matrix(test_data["True_values"],test_data["predicted_vaues"])
+    classification_score=classification_report(test_data["True_values"],test_data["predicted_vaues"])
+    # Get the name of the model
+    model_name = type(model).__name__
 
+    # Create a timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    filename = f"./dags/{filename_prefix}_{model_name}.txt"
+
+    # Open the file in write mode and write the metrics
+    with open(filename, 'a') as file:
+        file.write(f"\n")
+        file.write(model_name + '\n')
+        file.write(f'Accuracy Score : {accuracy}\n')
+        file.write(f'Precision Score : {precision}\n')
+        file.write(f'Recall Score : {recall}\n')
+        file.write(f'F1 score : {f1}\n')
+        file.write('Confusion Matrix :\n')
+        file.write(str(cm))
+        file.write(f"classification_report :{classification_score}\n")
+        file.write(f"\n")
+        
 
 load_data_task = PythonOperator(
     task_id="Extraction_of_data_from_UIC",
