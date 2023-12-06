@@ -29,11 +29,10 @@ svc=SVC()
 KNN=KNeighborsClassifier()
 LR=LogisticRegression()
 RF=RandomForestClassifier()
-model=RF
+model=svc
 param_grid = {
-    'parameters__n_estimators': [50, 100, 200],
-    'parameters__max_depth': [None, 10, 20],
-    'parameters__min_samples_split': [2, 5, 10],
+    'parameters__kernel': ['rbf','linear', 'poly'],
+    'parameters__C': [1.0,0.5,2]
     }
 # Define the DAG
 dag = DAG(
@@ -91,11 +90,6 @@ def ml_model():
     pipe = Pipeline(steps=[
     ("preprocessor", columns_ct),
     ("parameters",model)])
-
-
-
-    
-
 
     grid_search = GridSearchCV(estimator=pipe, param_grid=param_grid, cv=5, scoring='accuracy')
     grid_search.fit(x_train, y_train)
