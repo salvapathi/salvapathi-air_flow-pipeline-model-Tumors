@@ -1,5 +1,5 @@
 
-RandomForestClassifier:
+RandomForestClassifier
 Accuracy Score : 0.9649122807017544
 Precision Score : 0.9523809523809523
 Recall Score : 0.9523809523809523
