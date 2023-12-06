@@ -1,4 +1,4 @@
-#Training the Model  and data pipelineSs
+#Training the Model  and data pipeline
 import airflow
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
@@ -167,3 +167,5 @@ model_evaulation_task = PythonOperator(
 
 # Set the task dependencies
 load_data_task >> Transforming_task >> model_building_task >> model_evaulation_task
+
+
