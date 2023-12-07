@@ -1,0 +1,18 @@
+
+RandomForestClassifier
+Accuracy Score : 0.9824561403508771
+Precision Score : 0.9761904761904762
+Recall Score : 0.9761904761904762
+F1 score : 0.9761904761904762
+Confusion Matrix :
+[[71  1]
+ [ 1 41]]classification_report :                  precision    recall  f1-score   support
+
+   Benign_tumors       0.99      0.99      0.99        72
+Malignant_tumors       0.98      0.98      0.98        42
+
+        accuracy                           0.98       114
+       macro avg       0.98      0.98      0.98       114
+    weighted avg       0.98      0.98      0.98       114
+
+
