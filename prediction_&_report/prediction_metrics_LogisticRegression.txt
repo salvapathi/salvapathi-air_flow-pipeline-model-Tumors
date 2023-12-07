@@ -1,5 +1,5 @@
 
-LogisticRegression
+LogisticRegressions
 Accuracy Score : 0.9736842105263158
 Precision Score : 0.9534883720930233
 Recall Score : 0.9761904761904762
